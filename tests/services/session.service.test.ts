@@ -62,7 +62,7 @@ describe('createProgram', () => {
       createProgram({
         config: { ...minimalWorkoutProgram, domain: 'unknown_domain' },
       }, repos),
-    ).rejects.toThrow("Unknown domain 'unknown_domain'");
+    ).rejects.toThrow("Unknown Domain 'unknown_domain'");
   });
 });
 

@@ -221,15 +221,6 @@ const DANGEROUS_PATTERNS = [
   /[<>{}|\\^`]/,      // shell metacharacters
 ];
 
-export function validateUserString(input: string): string {
-  for (const pattern of DANGEROUS_PATTERNS) {
-    if (pattern.test(input)) {
-      throw new Error(`Invalid input: contains disallowed characters`);
-    }
-  }
-  return input;
-}
-
 export const SafeStringSchema = z.string().refine(
   (s) => DANGEROUS_PATTERNS.every((p) => !p.test(s)),
   { message: 'Input contains disallowed characters' },

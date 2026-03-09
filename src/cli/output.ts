@@ -35,13 +35,3 @@ export function applyFieldMask<T extends Record<string, unknown>>(
     keys.filter((k) => k in obj).map((k) => [k, obj[k]]),
   ) as Partial<T>;
 }
-
-/**
- * Dry-run wrapper — validates and reports without executing.
- */
-export interface DryRunResult<T> {
-  valid: boolean;
-  wouldWrite?: T;
-  warnings: string[];
-  errors: string[];
-}

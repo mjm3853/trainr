@@ -6,7 +6,6 @@ import {
   SessionContextSchema,
   ProgramConfigSchema,
   SafeStringSchema,
-  validateUserString,
 } from '../../src/core/schemas.js';
 
 describe('ActivityMetricSchema', () => {
@@ -172,16 +171,3 @@ describe('SafeStringSchema', () => {
   });
 });
 
-describe('validateUserString', () => {
-  it('returns the string if safe', () => {
-    expect(validateUserString('normal input')).toBe('normal input');
-  });
-
-  it('throws on path traversal', () => {
-    expect(() => validateUserString('../etc/passwd')).toThrow('Invalid input');
-  });
-
-  it('throws on control characters', () => {
-    expect(() => validateUserString('test\x00value')).toThrow('Invalid input');
-  });
-});

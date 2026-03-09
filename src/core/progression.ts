@@ -5,6 +5,7 @@
  */
 
 import type { ActivityTemplate, ActivityTarget, ActivityRecord } from './schemas.js';
+import { createRegistry } from './registry.js';
 
 // ─── Progression Params ───────────────────────────────────────────────────────
 
@@ -27,24 +28,8 @@ export interface ProgressionRule {
 
 // ─── Rule Registry ────────────────────────────────────────────────────────────
 
-const rules = new Map<string, ProgressionRule>();
+const rules = createRegistry<ProgressionRule>('ProgressionRule', (r) => r.id);
 
-export function registerRule(rule: ProgressionRule): void {
-  if (rules.has(rule.id)) {
-    throw new Error(`ProgressionRule '${rule.id}' is already registered`);
-  }
-  rules.set(rule.id, rule);
-}
-
-export function resolveRule(id: string): ProgressionRule {
-  const rule = rules.get(id);
-  if (!rule) {
-    const available = [...rules.keys()].join(', ');
-    throw new Error(`Unknown ProgressionRule '${id}'. Registered: ${available}`);
-  }
-  return rule;
-}
-
-export function clearRules(): void {
-  rules.clear();
-}
+export const registerRule = rules.register;
+export const resolveRule = rules.resolve;
+export const clearRules = rules.clear;

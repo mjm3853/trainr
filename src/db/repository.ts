@@ -31,6 +31,7 @@ export interface ProgramPositionRepository {
 export interface SessionRepository {
   findById(id: string): Promise<SessionRecord | null>;
   findByProgram(programId: string, limit?: number): Promise<SessionRecord[]>;
+  /** TODO: Drizzle impl ignores domain param — needs a JOIN on programs.domain to filter correctly. */
   findRecentByDomain(domain: string, limit: number): Promise<SessionRecord[]>;
   save(record: SessionRecord): Promise<void>;
 }

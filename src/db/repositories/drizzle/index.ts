@@ -36,7 +36,8 @@ import type {
 function parseSettings(json: string): Record<string, unknown> {
   try {
     return JSON.parse(json) as Record<string, unknown>;
-  } catch {
+  } catch (err) {
+    console.warn(`[trainr] Failed to parse program settings JSON: ${err instanceof Error ? err.message : err}`);
     return {};
   }
 }

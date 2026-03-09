@@ -80,7 +80,7 @@ export const TOOLS: McpTool[] = [
       if (!prog) throw new Error('No active program found');
 
       const plan = await planSession(prog.id, repos, {
-        context: input.context,
+        ...(input.context ? { context: input.context } : {}),
         coach,
       });
 
@@ -89,9 +89,9 @@ export const TOOLS: McpTool[] = [
           programId: prog.id,
           plannedSession: plan,
           activities: input.activities,
-          durationMinutes: input.durationMinutes,
-          context: input.context,
-          userNotes: input.userNotes,
+          ...(input.durationMinutes ? { durationMinutes: input.durationMinutes } : {}),
+          ...(input.context ? { context: input.context } : {}),
+          ...(input.userNotes ? { userNotes: input.userNotes } : {}),
         },
         repos,
       );
@@ -216,7 +216,7 @@ export const TOOLS: McpTool[] = [
 
       const plan = await planSession(prog.id, repos, {
         userMessage: question,
-        context,
+        ...(context ? { context } : {}),
         coach,
       });
 

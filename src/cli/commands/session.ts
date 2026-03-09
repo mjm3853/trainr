@@ -29,14 +29,17 @@ export function createSessionCommand(repos: Repositories, coach: CoachFn): Comma
       try {
         const programId = await resolveProgramId(options.program, repos);
         const plan = await planSession(programId, repos);
-        const config = parseProgramConfig((await repos.programs.findById(programId))!);
+        const program = await repos.programs.findById(programId);
+        if (!program) throw new Error(`Program '${programId}' not found`);
+        const config = parseProgramConfig(program);
         const position = await getProgramPosition(programId, repos);
+        if (!position) throw new Error(`No position found for program '${programId}'`);
         const domain = getDomain(config.domain);
 
         if (format === 'json') {
           outputJson({
             programName: config.name,
-            position: positionLabel(config, position!),
+            position: positionLabel(config, position),
             session: {
               label: plan.session.session.label,
               estimatedMinutes: plan.session.session.estimatedDuration,
@@ -67,12 +70,14 @@ export function createSessionCommand(repos: Repositories, coach: CoachFn): Comma
 
       try {
         const programId = await resolveProgramId(options.program, repos);
-        const program = (await repos.programs.findById(programId))!;
+        const program = await repos.programs.findById(programId);
+        if (!program) throw new Error(`Program '${programId}' not found`);
         const config = parseProgramConfig(program);
         const position = await getProgramPosition(programId, repos);
+        if (!position) throw new Error(`No position found for program '${programId}'`);
         const domain = getDomain(config.domain);
 
-        p.log.info(`${config.name} — ${positionLabel(config, position!)}`);
+        p.log.info(`${config.name} — ${positionLabel(config, position)}`);
 
         // Context collection
         const context = await collectSessionContext();
@@ -82,7 +87,7 @@ export function createSessionCommand(repos: Repositories, coach: CoachFn): Comma
         if (context) {
           spinner.start('Checking in with your coach...');
         }
-        const plan = await planSession(programId, repos, { context: context ?? undefined, coach });
+        const plan = await planSession(programId, repos, { ...(context ? { context } : {}), coach });
         if (context) spinner.stop('Coach ready');
 
         // Display plan
@@ -122,7 +127,7 @@ export function createSessionCommand(repos: Repositories, coach: CoachFn): Comma
             programId,
             plannedSession: plan,
             activities: activityRecords,
-            context: context ?? undefined,
+            ...(context ? { context } : {}),
             userNotes: (userNotes as string) || '',
           },
           repos,

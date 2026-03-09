@@ -12,13 +12,16 @@
  * BBB supplemental is optional — controlled by program settings.
  */
 
-import type { ProgramConfig } from '../../../core/schemas.js';
+import type { ProgramConfig, ActivityTemplate } from '../../../core/schemas.js';
 
 const WEEK_SCHEMES = ['5s', '3s', '1s', 'deload'] as const;
 type WeekScheme = typeof WEEK_SCHEMES[number];
 
-function squatPressSession(weekScheme: WeekScheme, includeBBB: boolean) {
-  const activities = [
+/** Inline activity definition — matches ActivityTemplate shape without requiring an id schema. */
+type ActivityDef = Omit<ActivityTemplate, 'config'> & { config: Record<string, unknown> };
+
+function squatPressSession(weekScheme: WeekScheme, includeBBB: boolean): ActivityDef[] {
+  const activities: ActivityDef[] = [
     {
       id: `squat_main_${weekScheme}`,
       name: 'Back Squat',
@@ -61,8 +64,8 @@ function squatPressSession(weekScheme: WeekScheme, includeBBB: boolean) {
   return activities;
 }
 
-function deadliftBenchSession(weekScheme: WeekScheme, includeBBB: boolean) {
-  const activities = [
+function deadliftBenchSession(weekScheme: WeekScheme, includeBBB: boolean): ActivityDef[] {
+  const activities: ActivityDef[] = [
     {
       id: `deadlift_main_${weekScheme}`,
       name: 'Deadlift',

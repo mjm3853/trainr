@@ -6,6 +6,7 @@
 
 import type { ActivityTarget, ActivityRecord, ActivityTemplate, SessionContext } from './schemas.js';
 import type { ProgressionRule } from './progression.js';
+import { createRegistry } from './registry.js';
 
 export type { DomainId } from './schemas.js';
 
@@ -76,28 +77,9 @@ export interface DomainModule {
 
 // ─── Domain Registry ─────────────────────────────────────────────────────────
 
-const registry = new Map<string, DomainModule>();
+const registry = createRegistry<DomainModule>('Domain', (m) => m.id);
 
-export function registerDomain(module: DomainModule): void {
-  if (registry.has(module.id)) {
-    throw new Error(`Domain '${module.id}' is already registered`);
-  }
-  registry.set(module.id, module);
-}
-
-export function getDomain(id: string): DomainModule {
-  const module = registry.get(id);
-  if (!module) {
-    const available = [...registry.keys()].join(', ');
-    throw new Error(`Unknown domain '${id}'. Available: ${available}`);
-  }
-  return module;
-}
-
-export function listDomains(): DomainModule[] {
-  return [...registry.values()];
-}
-
-export function clearRegistry(): void {
-  registry.clear();
-}
+export const registerDomain = registry.register;
+export const getDomain = registry.resolve;
+export const listDomains = registry.list;
+export const clearRegistry = registry.clear;
