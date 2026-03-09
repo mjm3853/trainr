@@ -20,9 +20,9 @@ export function createSessionCommand(repos: Repositories, coach: CoachFn): Comma
 
   session
     .command('next')
-    .description('Preview today\'s planned session')
+    .description('Preview today\'s planned session (use --output json for AI agents)')
     .option('--program <id>', 'Program ID (defaults to most recent active)')
-    .option('--output <format>', 'Output format: human|json', 'human')
+    .option('--output <format>', 'Output format: human|json (JSON recommended for agents)', 'human')
     .action(async (options) => {
       const format = parseOutputFormat(options.output);
 

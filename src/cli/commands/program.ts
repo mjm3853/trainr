@@ -15,7 +15,7 @@ export function createProgramCommand(repos: Repositories): Command {
 
   program
     .command('new')
-    .description('Create a new program with an interactive wizard')
+    .description('Create a new program with an interactive wizard (not suitable for agents)')
     .action(async () => {
       p.intro('trainr — new program');
 
@@ -54,8 +54,8 @@ export function createProgramCommand(repos: Repositories): Command {
 
   program
     .command('list')
-    .description('List active programs')
-    .option('--output <format>', 'Output format: human|json|ndjson', 'human')
+    .description('List active programs (agent-friendly: use --output json)')
+    .option('--output <format>', 'Output format: human|json|ndjson (JSON recommended for agents)', 'human')
     .option('--fields <fields>', 'Field mask for ndjson output (e.g. id,name,domain)')
     .action(async (options) => {
       const format = parseOutputFormat(options.output);
@@ -86,9 +86,9 @@ export function createProgramCommand(repos: Repositories): Command {
 
   program
     .command('status')
-    .description('Show current program position and next session')
+    .description('Show current program position and next session (use --output json for AI agents)')
     .option('--program <id>', 'Program ID')
-    .option('--output <format>', 'Output format: human|json', 'human')
+    .option('--output <format>', 'Output format: human|json (JSON recommended for agents)', 'human')
     .action(async (options) => {
       const format = parseOutputFormat(options.output);
 

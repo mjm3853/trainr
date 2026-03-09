@@ -3,7 +3,7 @@
  * Domain types are serialized/deserialized via JSON with Zod validation on read.
  */
 
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, isNull } from 'drizzle-orm';
 import type { Db } from '../../client.js';
 import {
   programs,
@@ -58,7 +58,7 @@ export class DrizzleProgramRepository implements ProgramRepository {
     const rows = await this.db
       .select()
       .from(programs)
-      .where(eq(programs.completedAt, null as unknown as Date));
+      .where(isNull(programs.completedAt));
     return rows.map((row) => this.rowToRecord(row));
   }
 

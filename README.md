@@ -36,7 +36,89 @@ Optionally set `ANTHROPIC_API_KEY` to enable AI-powered coaching adjustments.
 
 trainr is designed for agent consumption. Every command emits structured data; the MCP server provides direct tool access.
 
-### MCP Server
+**See [AGENT_GUIDE.md](AGENT_GUIDE.md) for detailed patterns, examples, and best practices.**
+
+### CLI-First Approach (Recommended)
+
+Use the CLI with `--output json` for simplicity and visibility:
+
+```bash
+# Read operations (safe, idempotent, agent-friendly)
+npx trainr session next --output json          # Get today's plan
+npx trainr program status --output json        # Check position
+npx trainr program list --output json          # List active programs
+npx trainr history --output json               # Recent sessions
+npx trainr history --session <id> --output json # Session details
+
+# Schema introspection (for runtime validation)
+npx trainr schema                  # List available schemas
+npx trainr schema session.next     # Get output type definition
+npx trainr schema session.log      # Get input type definition
+```
+
+**Exit codes:** 0 = success, 1 = error. Errors print to stderr.
+
+### Schema Introspection
+
+Every command has a corresponding schema. Fetch at startup to validate payloads:
+
+```bash
+$ npx trainr schema session.next
+{
+  "description": "Preview today's planned session",
+  "input": {...},
+  "output": {
+    "$ref": "#/definitions/SessionNext",
+    "definitions": {
+      "SessionNext": {
+        "properties": {
+          "programName": {"type": "string"},
+          "position": {"type": "string"},
+          "session": {
+            "properties": {
+              "label": {"type": "string"},
+              "activities": {"type": "array", "items": {...}}
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Use these schemas to validate agent outputs before mutation or validate CLI responses at parse time.
+
+### Agent Usage Patterns
+
+**✅ GOOD: State queries**
+- Read-only, deterministic, no side effects
+- Perfect for understanding current state before taking action
+```bash
+npx trainr session next --output json
+npx trainr program status --output json
+npx trainr history --output json
+```
+
+**✅ GOOD: Schema introspection**
+- Discover available commands and their types
+- Validate structured data at runtime
+```bash
+npx trainr schema session.log | jq '.input.definitions'
+```
+
+**⚠️ CAUTION: Mutations via CLI**
+- `session start` is interactive (requires user input for context, logging)
+- `program new` is interactive wizard (cannot be scripted)
+- These defeat the purpose of agent automation; use MCP instead
+
+**❌ AVOID**
+- Do not rely on `coach ask` — requires `ANTHROPIC_API_KEY` and is UI-heavy
+- Do not parse human output — always use `--output json`
+
+### MCP Server (For Direct Tool Access)
+
+Alternatively, use the Model Context Protocol server for native tool integration:
 
 ```bash
 MCP_TRANSPORT=stdio npm run mcp:stdio
@@ -53,7 +135,9 @@ Six tools mirror the CLI 1:1, accepting and returning JSON:
 | `history_list` | List recent sessions (supports `fields` param to limit output size) |
 | `coach_ask` | Ask the AI coach a freeform question with full program context |
 
-### Structured CLI
+Use MCP if you need bidirectional streaming or are building a tightly integrated agent environment. Use CLI if you prefer simplicity and Unix-style composition.
+
+### Structured CLI Output
 
 `--output json` on any command produces machine-readable output. `trainr schema [command]` emits the Zod-derived JSON Schema for that command's input, so agents can validate payloads at runtime without hardcoding types.
 

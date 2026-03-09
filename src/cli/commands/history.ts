@@ -14,7 +14,7 @@ export function createHistoryCommand(repos: Repositories): Command {
     .argument('[limit]', 'Number of recent sessions to show', '10')
     .option('--program <id>', 'Filter by program ID')
     .option('--session <id>', 'Show full detail for a specific session')
-    .option('--output <format>', 'Output format: human|json|ndjson', 'human')
+    .option('--output <format>', 'Output format: human|json|ndjson (JSON recommended for agents)', 'human')
     .option('--fields <fields>', 'Field mask for ndjson: id,completedAt,domain,summary')
     .action(async (limit, options) => {
       const format = parseOutputFormat(options.output);
