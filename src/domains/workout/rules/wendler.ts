@@ -87,7 +87,7 @@ export const wendlerMainRule: ProgressionRule = {
         kind: 'load_reps',
         weight,
         reps,
-        unit: settings.unit,
+        unit: (settings.unit as 'lbs' | 'kg'),
       },
       sets: scheme.length,
       note: workingSet.reps === 'amrap'
@@ -120,7 +120,7 @@ export const wendlerBBBRule: ProgressionRule = {
         kind: 'load_reps',
         weight,
         reps: config.reps,
-        unit: settings.unit,
+        unit: (settings.unit as 'lbs' | 'kg'),
       },
       sets: config.sets,
       note: `BBB: ${config.sets}×${config.reps} @ ${Math.round(config.percentage * 100)}% TM (${tm}${settings.unit})`,

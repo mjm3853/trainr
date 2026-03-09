@@ -2,8 +2,9 @@ import type { DomainModule } from '../../core/domain.js';
 import { ok, err } from '../../core/domain.js';
 import { wendlerMainRule, wendlerBBBRule } from './rules/wendler.js';
 import { linearProgressionRule } from './rules/linear.js';
+import { stewSmithPullupRule, stewSmithAssistanceRule } from './rules/stew-smith.js';
 import { formatActivityTarget, formatActivityRecord, summarizeSession } from './format.js';
-import { WorkoutSettingsSchema } from './schemas.js';
+import { WorkoutSettingsSchema, StewSmithWorkoutSettingsSchema } from './schemas.js';
 
 const WORKOUT_SYSTEM_PROMPT = `You are a knowledgeable strength and conditioning coach. You help athletes follow progressive overload programs safely and effectively.
 
@@ -26,7 +27,7 @@ Progression philosophy:
 export const workoutDomain: DomainModule = {
   id: 'workout',
   displayName: 'Strength Training',
-  progressionRules: [wendlerMainRule, wendlerBBBRule, linearProgressionRule],
+  progressionRules: [wendlerMainRule, wendlerBBBRule, linearProgressionRule, stewSmithPullupRule, stewSmithAssistanceRule],
   contextQuestions: [
     { id: 'energy', kind: 'energy_level' },
     { id: 'pain', kind: 'pain_points' },
@@ -35,11 +36,28 @@ export const workoutDomain: DomainModule = {
   systemPrompt: WORKOUT_SYSTEM_PROMPT,
 
   validateProgramSettings(settings: unknown) {
-    const result = WorkoutSettingsSchema.safeParse(settings);
-    if (!result.success) {
-      return err(result.error.issues.map((i) => i.message).join(', '));
+    // Accept either generic workout settings or Stew Smith pull-up settings.
+    const base = WorkoutSettingsSchema.safeParse(settings);
+    if (base.success) {
+      return ok(undefined);
     }
-    return ok(undefined);
+    // try stew smith schema if base failed
+    try {
+      StewSmithWorkoutSettingsSchema.parse(settings);
+      return ok(undefined);
+    } catch (e) {
+      // combine errors from both schemas
+      const messages: string[] = [];
+      if (!base.success) {
+        messages.push(...base.error.issues.map((i) => i.message));
+      }
+      if (e instanceof Error && 'errors' in e) {
+        // zod error
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        messages.push(...((e as any).errors.map((i: any) => i.message)));
+      }
+      return err(messages.join(', '));
+    }
   },
 
   formatActivityTarget,
@@ -47,11 +65,21 @@ export const workoutDomain: DomainModule = {
   summarizeSession,
 
   contextForAI(settings, context) {
-    const parsed = WorkoutSettingsSchema.safeParse(settings);
-    if (!parsed.success) return {};
+    // Try both schemas when constructing context; default to WorkoutSettings if possible.
+    let tms: Record<string, number> = {};
+    let unit: string = '';
 
-    const tms = parsed.data.trainingMaxes;
-    const unit = parsed.data.unit;
+    const workoutParse = WorkoutSettingsSchema.safeParse(settings);
+    if (workoutParse.success) {
+      tms = workoutParse.data.trainingMaxes;
+      unit = workoutParse.data.unit;
+    } else {
+      const stewParse = StewSmithWorkoutSettingsSchema.safeParse(settings);
+      if (stewParse.success) {
+        tms = stewParse.data.trainingMaxes;
+        unit = stewParse.data.unit;
+      }
+    }
 
     return {
       trainingMaxes: Object.entries(tms).reduce(

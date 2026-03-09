@@ -43,7 +43,8 @@ export const linearProgressionRule: ProgressionRule = {
         kind: 'load_reps',
         weight,
         reps: config.reps,
-        unit: settings.unit,
+        // stewsmith may introduce 'bodyweight' but this rule only used with lbs/kg
+    unit: (settings.unit as 'lbs' | 'kg'),
       },
       sets: config.sets,
       note: lastRecord

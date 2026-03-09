@@ -6,6 +6,7 @@ import { getDomain, listDomains } from '../../core/domain.js';
 import { parseOutputFormat, outputJson, outputNdjson } from '../output.js';
 import { positionLabel } from '../../core/program.js';
 import { create531Program } from '../../domains/workout/programs/531-4day.js';
+import { createStewSmithPullupProgram } from '../../domains/workout/programs/stew-smith-pullups.js';
 
 export function createProgramCommand(repos: Repositories): Command {
   const program = new Command('program');
@@ -137,10 +138,16 @@ async function workoutProgramWizard() {
     options: [
       { value: '531', label: 'Wendler 5/3/1 (4-day split)' },
       { value: '531-bbb', label: 'Wendler 5/3/1 + BBB (4-day + supplemental volume)' },
+      { value: 'stew-smith-pullups', label: 'Stew Smith Pull-up Program (3x/week)' },
     ],
   });
   if (p.isCancel(variant)) return null;
 
+  if (variant === 'stew-smith-pullups') {
+    return await stewSmithProgramWizard();
+  }
+
+  // Handle Wendler programs
   const unit = await p.select({
     message: 'Weight unit?',
     options: [
@@ -173,6 +180,40 @@ async function workoutProgramWizard() {
     pressTM: toTM(press1rm as string),
     includeBBB: variant === '531-bbb',
     unit: unit as 'lbs' | 'kg',
+  });
+}
+
+async function stewSmithProgramWizard() {
+  p.log.info('Stew Smith Pull-up Program — Building pull-up strength using military training methods.');
+
+  const currentMax = await p.text({
+    message: 'How many strict pull-ups can you do right now? (0 if none)',
+    validate: (v) => {
+      const n = parseInt(v, 10);
+      if (isNaN(n) || n < 0) return 'Enter a non-negative number';
+      return undefined;
+    }
+  });
+  if (p.isCancel(currentMax)) return null;
+
+  const sessionsPerWeek = await p.select({
+    message: 'How many days per week do you want to train pull-ups?',
+    options: [
+      { value: 3, label: '3 days/week (recommended)' },
+      { value: 4, label: '4 days/week (advanced)' },
+    ],
+  });
+  if (p.isCancel(sessionsPerWeek)) return null;
+
+  const includeAssistance = await p.confirm({
+    message: 'Include assistance exercises? (recommended for beginners)',
+  });
+  if (p.isCancel(includeAssistance)) return null;
+
+  return createStewSmithPullupProgram({
+    currentMaxPullups: parseInt(currentMax as string, 10),
+    sessionsPerWeek: sessionsPerWeek as 3 | 4,
+    includeAssistance: includeAssistance as boolean,
   });
 }
 
