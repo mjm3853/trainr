@@ -204,3 +204,16 @@ npm run build         # tsc to dist/
 ```
 
 Requires Node >= 20.
+
+CI runs automatically on every push and pull request via GitHub Actions (lint + full test suite).
+
+### Releases
+
+Cut a release by bumping the version and pushing a tag:
+
+```bash
+npm version patch   # or minor / major
+git push --follow-tags
+```
+
+GitHub Actions builds `dist/`, creates a GitHub Release, and attaches a tarball. Release notes are auto-generated from commit messages.
