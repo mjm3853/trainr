@@ -92,8 +92,10 @@ Use these schemas to validate agent outputs before mutation or validate CLI resp
 ### Agent Usage Patterns
 
 **✅ GOOD: State queries**
+
 - Read-only, deterministic, no side effects
 - Perfect for understanding current state before taking action
+
 ```bash
 npx trainr session next --output json
 npx trainr program status --output json
@@ -101,18 +103,22 @@ npx trainr history --output json
 ```
 
 **✅ GOOD: Schema introspection**
+
 - Discover available commands and their types
 - Validate structured data at runtime
+
 ```bash
 npx trainr schema session.log | jq '.input.definitions'
 ```
 
 **⚠️ CAUTION: Mutations via CLI**
+
 - `session start` is interactive (requires user input for context, logging)
 - `program new` is interactive wizard (cannot be scripted)
 - These defeat the purpose of agent automation; use MCP instead
 
 **❌ AVOID**
+
 - Do not rely on `coach ask` — requires `ANTHROPIC_API_KEY` and is UI-heavy
 - Do not parse human output — always use `--output json`
 

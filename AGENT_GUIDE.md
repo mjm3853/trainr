@@ -86,6 +86,7 @@ fi
 ```
 
 Common errors:
+
 - `No active programs.` — User hasn't created any program yet
 - `Program '<id>' not found` — Invalid program ID
 - `Session '<id>' not found` — Invalid session ID
@@ -101,6 +102,7 @@ trainr session next --output json | jq '.session.activities[0]'
 ```
 
 Output is predictable:
+
 - All objects have documented fields (via schema)
 - Nulls for missing optional fields
 - Dates in ISO-8601 UTC
@@ -145,6 +147,7 @@ MCP_TRANSPORT=stdio npm run mcp:stdio
 ```
 
 The MCP server exposes the same 6 tools as the CLI commands, but with better error handling and streaming capabilities. Use this if:
+
 - You need to stream large session histories
 - You want native MCP integration (e.g., Claude's tools)
 - You prefer binary protocol over JSON-over-stdin
@@ -155,7 +158,8 @@ The MCP server exposes the same 6 tools as the CLI commands, but with better err
 
 **Problem:** `trainr program new` is an interactive wizard.
 
-**Workaround:** 
+**Workaround:**
+
 - Have the user create programs via `npm run dev -- program new` (interactive)
 - Then agent queries them via `trainr program status`
 - For mass testing, use MCP server with direct tool access
@@ -165,6 +169,7 @@ The MCP server exposes the same 6 tools as the CLI commands, but with better err
 **Problem:** `trainr session start` collects context via interactive prompts.
 
 **Workaround:**
+
 - Use MCP `session_log` tool to log sessions directly with JSON payloads
 - Or call the internal service layer if you're embedding trainr in Node.js
 
@@ -173,6 +178,7 @@ The MCP server exposes the same 6 tools as the CLI commands, but with better err
 **Problem:** `trainr coach ask` fails silently if `ANTHROPIC_API_KEY` not set.
 
 **Workaround:**
+
 - Check `process.env.ANTHROPIC_API_KEY` before calling
 - Use MCP `coach_ask` tool (includes better error messages)
 - Or skip coaching entirely — trainr is fully functional without AI
@@ -182,6 +188,7 @@ The MCP server exposes the same 6 tools as the CLI commands, but with better err
 **Problem:** `--fields id,name` doesn't filter NDJSON output.
 
 **Workaround:**
+
 - Request JSON and filter with `jq`: `trainr program list --output json | jq '.[] | {id, name}'`
 - Or use MCP `history_list` tool which supports true field filtering
 
@@ -217,12 +224,14 @@ fi
 ## CLI Stability
 
 The CLI follows semantic versioning:
+
 - **v0.x:** Breaking changes possible (currently here)
 - **v1.x:** Stable schema, guaranteed compatibility
 
 Schemas (`trainr schema`) are forward-compatible within major versions.
 
 Exit codes are stable:
+
 - `0` = success
 - `1` = error (any kind)
 
@@ -253,7 +262,7 @@ npx trainr session next --output json
 - **No async notifications:** Polling only (no webhooks)
 
 For production agent deployments:
+
 - Use **MCP server** for native integration
 - Set `DATABASE_URL` to **Turso** (libSQL cloud) for durability
 - Or embed trainr's services directly in your agent runtime (TypeScript only)
-
