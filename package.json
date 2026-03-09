@@ -1,6 +1,6 @@
 {
   "name": "trainr",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Personal coaching CLI — progressive programs for workouts, golf, learning, and more",
   "type": "module",
   "bin": {
