@@ -1,0 +1,46 @@
+{
+  "name": "trainr",
+  "version": "0.1.0",
+  "description": "Personal coaching CLI — progressive programs for workouts, golf, learning, and more",
+  "type": "module",
+  "bin": {
+    "trainr": "./dist/cli/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/cli/index.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "db:generate": "drizzle-kit generate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio",
+    "mcp:stdio": "MCP_TRANSPORT=stdio tsx src/mcp/server.ts",
+    "mcp:http": "MCP_TRANSPORT=http tsx src/mcp/server.ts",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "@clack/prompts": "^0.9.0",
+    "@libsql/client": "^0.14.0",
+    "@modelcontextprotocol/sdk": "^1.9.0",
+    "commander": "^13.0.0",
+    "drizzle-orm": "^0.40.0",
+    "postgres": "^3.4.5",
+    "uuid": "^11.0.5",
+    "zod": "^3.24.0",
+    "zod-to-json-schema": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/uuid": "^10.0.0",
+    "@vitest/coverage-v8": "^3.0.0",
+    "drizzle-kit": "^0.30.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
