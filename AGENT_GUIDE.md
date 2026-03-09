@@ -237,6 +237,8 @@ Exit codes are stable:
 
 JSON output structure is versioned implicitly; breaking changes bump major version.
 
+Releases are published as GitHub Releases on the repository. Each release includes a `dist/` tarball and auto-generated changelog. Pin to a specific release tag when embedding trainr in agent pipelines to avoid unexpected breaking changes.
+
 ## Recommended Setup
 
 ```bash
