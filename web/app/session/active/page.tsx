@@ -90,8 +90,9 @@ function ActiveSessionInner() {
       adjustmentReason: null,
     }));
 
-    const elapsed = Math.round(
-      (Date.now() - startedAt.current.getTime()) / 60_000,
+    const elapsed = Math.max(
+      1,
+      Math.round((Date.now() - startedAt.current.getTime()) / 60_000),
     );
 
     await logMutation.mutateAsync({
@@ -214,6 +215,7 @@ function ActiveSessionInner() {
       <div className="p-4">
         {currentActivity.target ? (
           <SetLogger
+            key={activityIndex}
             activityName={currentActivity.name}
             metric={currentActivity.metric}
             target={currentActivity.target}
