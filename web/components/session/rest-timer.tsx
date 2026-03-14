@@ -37,7 +37,7 @@ export function RestTimer({ seconds: initialSeconds, onDismiss }: RestTimerProps
       <div
         className="relative flex size-32 items-center justify-center rounded-full"
         style={{
-          background: `conic-gradient(oklch(0.922 0 0) ${degrees}deg, oklch(0.269 0 0) ${degrees}deg)`,
+          background: `conic-gradient(oklch(0.72 0.14 210) ${degrees}deg, oklch(0.22 0.02 255) ${degrees}deg)`,
         }}
       >
         <div className="flex size-[7rem] items-center justify-center rounded-full bg-background">
