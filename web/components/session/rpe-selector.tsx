@@ -34,13 +34,13 @@ export function RpeSelector({ value, onChange }: RpeSelectorProps) {
           </button>
         )}
       </div>
-      <div className="grid grid-cols-10 gap-1">
+      <div className="grid grid-cols-5 gap-2">
         {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
           <button
             key={n}
             onClick={() => onChange(n === value ? null : n)}
             className={cn(
-              "flex size-9 items-center justify-center rounded-md border text-sm font-medium transition-all",
+              "flex h-11 items-center justify-center rounded-lg border text-sm font-medium transition-all",
               value === n
                 ? rpeColors[n]
                 : "border-border bg-muted/50 text-muted-foreground hover:bg-muted",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 
 interface RestTimerProps {
@@ -9,6 +9,7 @@ interface RestTimerProps {
 }
 
 export function RestTimer({ seconds: initialSeconds, onDismiss }: RestTimerProps) {
+  const [duration, setDuration] = useState(initialSeconds);
   const [remaining, setRemaining] = useState(initialSeconds);
 
   useEffect(() => {
@@ -20,7 +21,14 @@ export function RestTimer({ seconds: initialSeconds, onDismiss }: RestTimerProps
     return () => clearTimeout(timer);
   }, [remaining, onDismiss]);
 
-  const progress = 1 - remaining / initialSeconds;
+  function adjustDuration(delta: number) {
+    const newDuration = Math.max(15, duration + delta);
+    const newRemaining = Math.max(1, remaining + delta);
+    setDuration(newDuration);
+    setRemaining(newRemaining);
+  }
+
+  const progress = 1 - remaining / duration;
   const degrees = progress * 360;
 
   return (
@@ -36,9 +44,17 @@ export function RestTimer({ seconds: initialSeconds, onDismiss }: RestTimerProps
           <span className="text-4xl font-bold tabular-nums">{remaining}</span>
         </div>
       </div>
-      <Button variant="ghost" size="sm" onClick={onDismiss}>
-        Skip rest
-      </Button>
+      <div className="flex items-center gap-3">
+        <Button variant="outline" size="sm" onClick={() => adjustDuration(-15)}>
+          &minus;15s
+        </Button>
+        <Button variant="ghost" size="sm" onClick={onDismiss}>
+          Skip rest
+        </Button>
+        <Button variant="outline" size="sm" onClick={() => adjustDuration(15)}>
+          +15s
+        </Button>
+      </div>
     </div>
   );
 }

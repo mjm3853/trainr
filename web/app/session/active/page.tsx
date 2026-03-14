@@ -5,13 +5,16 @@ import { useState, useEffect, useRef, useCallback, Suspense } from "react";
 import { useNextSession, useLogSession } from "@/lib/queries";
 import { PageHeader } from "@/components/layout/page-header";
 import { SetLogger } from "@/components/session/set-logger";
+import { SessionSummary } from "@/components/session/session-summary";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
 import { formatSetValue, formatDuration } from "@/lib/format";
-import type { ActivitySet, ActivityRecord, PlannedActivity } from "@/lib/types";
+import type { ActivitySet, ActivityRecord, PlannedActivity, SessionContext } from "@/lib/types";
 
 const DRAFT_KEY = "trainr_active_session";
+const CONTEXT_KEY = "trainr_session_context";
 
 interface ActivityResult {
   activity: PlannedActivity;
@@ -38,6 +41,20 @@ function ActiveSessionInner() {
   const [results, setResults] = useState<ActivityResult[]>([]);
   const [userNotes, setUserNotes] = useState("");
   const startedAt = useRef(new Date());
+  const sessionContext = useRef<SessionContext | undefined>(undefined);
+
+  // Load session context from localStorage
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(CONTEXT_KEY);
+      if (raw) {
+        sessionContext.current = JSON.parse(raw);
+        localStorage.removeItem(CONTEXT_KEY);
+      }
+    } catch {
+      // ignore corrupt context
+    }
+  }, []);
 
   // Restore draft from localStorage
   useEffect(() => {
@@ -99,6 +116,7 @@ function ActiveSessionInner() {
       programId: plan.programId,
       activities,
       durationMinutes: elapsed,
+      context: sessionContext.current,
       userNotes: userNotes || undefined,
     });
 
@@ -112,7 +130,8 @@ function ActiveSessionInner() {
         <PageHeader title="Loading..." />
         <div className="space-y-3 p-4">
           <Skeleton className="h-8 w-40" />
-          <Skeleton className="h-64 w-full" />
+          <Skeleton className="h-64 w-full rounded-xl" />
+          <Skeleton className="h-14 w-full rounded-lg" />
         </div>
       </>
     );
@@ -127,11 +146,20 @@ function ActiveSessionInner() {
       (Date.now() - startedAt.current.getTime()) / 60_000,
     );
 
+    const summaryActivities: ActivityRecord[] = results.map((r) => ({
+      templateId: r.activity.id,
+      target: r.activity.target!,
+      sets: r.sets,
+      rpe: r.rpe,
+      aiAdjusted: false,
+      adjustmentReason: null,
+    }));
+
     return (
       <>
         <PageHeader title="Session Complete" />
         <div className="space-y-4 p-4">
-          <div className="text-center">
+          <div className="text-center animate-in fade-in zoom-in-95 duration-300">
             <div className="mx-auto mb-3 flex size-16 items-center justify-center rounded-full bg-primary/10">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="size-8 text-primary">
                 <polyline points="20 6 9 17 4 12" />
@@ -143,9 +171,14 @@ function ActiveSessionInner() {
             </p>
           </div>
 
+          {/* Summary stats */}
+          <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 delay-150">
+            <SessionSummary activities={summaryActivities} durationMinutes={elapsed} />
+          </div>
+
           {/* Results summary */}
           {results.map((r, i) => (
-            <Card key={i}>
+            <Card key={i} className="animate-in fade-in slide-in-from-bottom-2 duration-300" style={{ animationDelay: `${200 + i * 50}ms` }}>
               <CardContent className="p-3">
                 <div className="flex items-center justify-between">
                   <span className="font-medium">{r.activity.name}</span>
@@ -172,8 +205,7 @@ function ActiveSessionInner() {
           ))}
 
           {/* Notes */}
-          <textarea
-            className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+          <Textarea
             placeholder="Any notes about this session?"
             rows={3}
             value={userNotes}
@@ -194,6 +226,7 @@ function ActiveSessionInner() {
 
   // ─── Active Logging ────────────────────────────────────────────────────────
   const currentActivity = activities[activityIndex];
+  const progressPercent = (activityIndex / activities.length) * 100;
 
   return (
     <>
@@ -205,23 +238,23 @@ function ActiveSessionInner() {
       {/* Top progress bar */}
       <div className="h-1 bg-muted">
         <div
-          className="h-full bg-primary transition-all duration-300"
-          style={{
-            width: `${(activityIndex / activities.length) * 100}%`,
-          }}
+          className="h-full bg-primary transition-all duration-500"
+          style={{ width: `${progressPercent}%` }}
         />
       </div>
 
       <div className="p-4">
         {currentActivity.target ? (
-          <SetLogger
-            key={activityIndex}
-            activityName={currentActivity.name}
-            metric={currentActivity.metric}
-            target={currentActivity.target}
-            config={currentActivity.config}
-            onComplete={handleActivityComplete}
-          />
+          <div key={activityIndex} className="animate-in fade-in slide-in-from-right-4 duration-200">
+            <SetLogger
+              key={activityIndex}
+              activityName={currentActivity.name}
+              metric={currentActivity.metric}
+              target={currentActivity.target}
+              config={currentActivity.config}
+              onComplete={handleActivityComplete}
+            />
+          </div>
         ) : (
           <div className="py-8 text-center text-muted-foreground">
             No target for this activity.
@@ -246,7 +279,8 @@ export default function ActiveSessionPage() {
         <PageHeader title="Loading..." />
         <div className="space-y-3 p-4">
           <Skeleton className="h-8 w-40" />
-          <Skeleton className="h-64 w-full" />
+          <Skeleton className="h-64 w-full rounded-xl" />
+          <Skeleton className="h-14 w-full rounded-lg" />
         </div>
       </>
     }>

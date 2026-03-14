@@ -129,6 +129,7 @@ export interface ProgramStatus {
 export interface HistorySession {
   id: string;
   templateId: string;
+  label: string | null;
   cycleOrdinal: number;
   sessionOrdinal: number;
   completedAt: string | null;
@@ -146,6 +147,7 @@ export interface SessionDetail {
   id: string;
   programId: string;
   templateId: string;
+  label: string | null;
   cycleOrdinal: number;
   sessionOrdinal: number;
   completedAt: string | null;

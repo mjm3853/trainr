@@ -1,16 +1,17 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { DM_Sans, DM_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/lib/providers";
 import { BottomNav } from "@/components/layout/bottom-nav";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const dmSans = DM_Sans({
+  variable: "--font-dm-sans",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const dmMono = DM_Mono({
+  variable: "--font-dm-mono",
+  weight: ["300", "400", "500"],
   subsets: ["latin"],
 });
 
@@ -36,7 +37,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${dmSans.variable} ${dmMono.variable} antialiased`}
       >
         <Providers>
           <main className="mx-auto min-h-dvh max-w-lg pb-20">

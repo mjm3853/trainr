@@ -18,7 +18,7 @@ export function SessionListItem({ session }: SessionListItemProps) {
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
               <span className="truncate font-medium">
-                {session.templateId}
+                {session.label ?? session.templateId}
               </span>
               {session.skipped && (
                 <Badge variant="secondary" className="text-[10px]">

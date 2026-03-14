@@ -74,3 +74,20 @@ export function formatDate(iso: string | null): string {
     minute: "2-digit",
   });
 }
+
+export function formatVolume(volume: number): string {
+  return `${volume.toLocaleString("en-US")} lbs`;
+}
+
+export function formatRelativeDate(iso: string): string {
+  const d = new Date(iso);
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startOfDay = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const daysDiff = Math.round((startOfToday.getTime() - startOfDay.getTime()) / 86_400_000);
+
+  if (daysDiff === 0) return "Today";
+  if (daysDiff === 1) return "Yesterday";
+  if (daysDiff < 7) return "This Week";
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}

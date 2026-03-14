@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
+import { SessionSummary } from "@/components/session/session-summary";
 import { formatSetValue, formatDate, formatDuration } from "@/lib/format";
 
 export default function SessionDetailPage() {
@@ -32,7 +33,7 @@ export default function SessionDetailPage() {
   return (
     <>
       <PageHeader
-        title={session.templateId}
+        title={session.label ?? session.templateId}
         action={
           <Button variant="ghost" size="sm" onClick={() => router.back()}>
             Back
@@ -90,6 +91,12 @@ export default function SessionDetailPage() {
             </CardContent>
           </Card>
         )}
+
+        {/* Summary stats */}
+        <SessionSummary
+          activities={session.activities}
+          durationMinutes={session.durationMinutes ?? undefined}
+        />
 
         <Separator />
 

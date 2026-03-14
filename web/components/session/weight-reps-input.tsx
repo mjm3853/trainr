@@ -11,6 +11,10 @@ interface StepperRowProps {
   unit?: string;
 }
 
+function haptic() {
+  if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(10);
+}
+
 function StepperRow({ label, value, step, min = 0, onChange, unit }: StepperRowProps) {
   return (
     <div className="flex items-center gap-3">
@@ -18,7 +22,7 @@ function StepperRow({ label, value, step, min = 0, onChange, unit }: StepperRowP
       <Button
         variant="outline"
         className="size-14 shrink-0 text-xl font-bold"
-        onClick={() => onChange(Math.max(min, value - step))}
+        onClick={() => { haptic(); onChange(Math.max(min, value - step)); }}
       >
         &minus;
       </Button>
@@ -31,7 +35,7 @@ function StepperRow({ label, value, step, min = 0, onChange, unit }: StepperRowP
       <Button
         variant="outline"
         className="size-14 shrink-0 text-xl font-bold"
-        onClick={() => onChange(value + step)}
+        onClick={() => { haptic(); onChange(value + step); }}
       >
         +
       </Button>
