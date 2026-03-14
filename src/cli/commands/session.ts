@@ -11,6 +11,7 @@ import { renderPlannedSession } from '../render/session.render.js';
 import { parseOutputFormat, outputJson } from '../output.js';
 import { positionLabel } from '../../core/program.js';
 import { getProgramPosition } from '../../services/program.service.js';
+import { dim, warn, S } from '../render/theme.js';
 
 export function createSessionCommand(repos: Repositories, coach: CoachFn): Command {
   const session = new Command('session');
@@ -163,7 +164,7 @@ export function createSessionCommand(repos: Repositories, coach: CoachFn): Comma
           if (format === 'json') {
             outputJson({ valid: true, wouldWrite: { skipped: true, skipReason }, warnings: [], errors: [] });
           } else {
-            console.log(`[dry-run] Would skip session with reason: "${skipReason}"`);
+            console.log(`${dim('[dry-run]')} ${warn(S.BULLET_OPEN)}  Session skipped ${dim('—')} ${dim(skipReason)}`);
           }
           return;
         }
@@ -173,7 +174,7 @@ export function createSessionCommand(repos: Repositories, coach: CoachFn): Comma
         if (format === 'json') {
           outputJson({ id: record.id, skipped: true, skipReason: record.skipReason });
         } else {
-          console.log(`Session skipped. Reason: ${skipReason}`);
+          console.log(`${warn(S.BULLET_OPEN)}  Session skipped ${dim('—')} ${dim(skipReason)}`);
         }
       } catch (err) {
         console.error(err instanceof Error ? err.message : err);

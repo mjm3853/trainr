@@ -7,6 +7,7 @@ import { parseOutputFormat, outputJson, outputNdjson } from '../output.js';
 import { positionLabel } from '../../core/program.js';
 import { create531Program } from '../../domains/workout/programs/531-4day.js';
 import { createStewSmithPullupProgram } from '../../domains/workout/programs/stew-smith-pullups.js';
+import { bold, dim, accent, divider, box } from '../render/theme.js';
 
 export function createProgramCommand(repos: Repositories): Command {
   const program = new Command('program');
@@ -72,9 +73,12 @@ export function createProgramCommand(repos: Repositories): Command {
           if (programs.length === 0) {
             console.log('No active programs. Run `trainr program new` to create one.');
           } else {
+            console.log(`\n  ${bold('Active Programs')}`);
+            console.log(`  ${divider()}\n`);
             for (const prog of programs) {
-              console.log(`  ${prog.id.slice(0, 8)}  ${prog.name}  [${prog.domain}]`);
+              console.log(`  ${dim(prog.id.slice(0, 8))}  ${bold(prog.name)}  ${accent(prog.domain)}`);
             }
+            console.log('');
           }
         }
       } catch (err) {
@@ -120,8 +124,10 @@ export function createProgramCommand(repos: Repositories): Command {
             sessionOrdinal: position.currentSessionOrdinal,
           });
         } else {
-          console.log(`\n${prog.name} [${prog.domain}]`);
-          console.log(`Position: ${label}`);
+          console.log('\n' + box(prog.name, [
+            `${dim('Domain')}    ${accent(prog.domain)}`,
+            `${dim('Position')}  ${label}`,
+          ]));
         }
       } catch (err) {
         console.error(err instanceof Error ? err.message : err);

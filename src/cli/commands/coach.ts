@@ -5,6 +5,7 @@ import { planSession } from '../../services/session.service.js';
 import { getActivePrograms, parseProgramConfig, getProgramPosition } from '../../services/program.service.js';
 import { getDomain } from '../../core/domain.js';
 import { parseOutputFormat, outputJson } from '../output.js';
+import { bold, dim, accent, S, box } from '../render/theme.js';
 
 export function createCoachCommand(repos: Repositories, coach: CoachFn): Command {
   const coachCmd = new Command('coach');
@@ -41,13 +42,15 @@ export function createCoachCommand(repos: Repositories, coach: CoachFn): Command
             adjustments: plan.coachingNote?.adjustments ?? [],
           });
         } else {
-          console.log(`\nCoach: ${response}`);
+          const lines: (string | null)[] = [response];
           if (plan.coachingNote?.adjustments.length) {
-            console.log('\nSuggested adjustments:');
+            lines.push(null);
+            lines.push(bold('Adjustments'));
             for (const adj of plan.coachingNote.adjustments) {
-              console.log(`  • ${adj.activityId}: ${adj.rationale}`);
+              lines.push(`  ${accent(S.ARROW)} ${bold(adj.activityId)} ${dim('—')} ${adj.rationale}`);
             }
           }
+          console.log('\n' + box('Coach', lines));
         }
       } catch (err) {
         console.error(err instanceof Error ? err.message : err);
