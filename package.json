@@ -16,6 +16,7 @@
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "api": "tsx src/api/server.ts",
+    "web": "npm --prefix web install --silent && (npm run api & npm --prefix web run dev & wait)",
     "mcp:stdio": "MCP_TRANSPORT=stdio tsx src/mcp/server.ts",
     "mcp:http": "MCP_TRANSPORT=http tsx src/mcp/server.ts",
     "lint": "tsc --noEmit"

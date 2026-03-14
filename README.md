@@ -2,7 +2,7 @@
 
 Personal coaching CLI with progressive programs for workouts, golf, learning, and more.
 
-Built on **7 universal primitives** that model any progressive training domain. Ships with a **workout domain** (Wendler 5/3/1, linear progression); new domains plug in via a single interface. AI coaching through Claude is additive -- the system is fully functional without it.
+Built on **7 universal primitives** that model any progressive training domain. Ships with a **workout domain** (Wendler 5/3/1, Boring But Big, Stew Smith pullups, linear progression); new domains plug in via a single interface. Includes a mobile-first **web UI** (Next.js + React 19) backed by a **Hono REST API**. AI coaching through Claude is additive -- the system is fully functional without it.
 
 ## Quick Start
 
@@ -15,6 +15,14 @@ npx trainr session start       # begin session with context collection + logging
 ```
 
 Optionally set `ANTHROPIC_API_KEY` to enable AI-powered coaching adjustments.
+
+### Web UI
+
+```bash
+npm run web                   # start API + Next.js together
+```
+
+The web UI provides a mobile-first interface for session management, set logging with rest timers, RPE tracking, and session history. It connects to the same backend services as the CLI via the REST API.
 
 ## CLI Reference
 
@@ -153,7 +161,7 @@ Seven **universal primitives** model any progressive coaching domain:
 
 **Program** -- a named training plan with cycles, goal statement, and domain-specific settings. **Cycle** -- a repeating temporal unit (e.g., a 4-week Wendler cycle) containing ordered sessions. **Session** -- one day's engagement, composed of activities with resolved targets. **Activity** -- a single exercise or task with a metric type (load/reps, duration, rating, completion, etc.) and a progression rule. **ProgressionRule** -- a pure function that computes the next target from history (e.g., Wendler percentages, linear +5 lbs). **SessionContext** -- pre-session state (energy level, pain points, time constraints) that feeds AI adjustments. **CoachingNote** -- AI-generated or user-authored narrative with structured adjustments attached to a session.
 
-**Key design decisions.** All types derive from **Zod schemas** in `src/core/schemas.ts` -- TypeScript types are inferred, never hand-written. Services depend on **Repository interfaces**, not Drizzle directly, enabling in-memory test doubles (51 tests, zero external calls). The **CoachFn** is injected: tests use a null coach, production optionally wires in Claude. Domain modules register via `registerDomain()` + `registerRule()` at boot with zero changes to core code.
+**Key design decisions.** All types derive from **Zod schemas** in `src/core/schemas.ts` -- TypeScript types are inferred, never hand-written. Services depend on **Repository interfaces**, not Drizzle directly, enabling in-memory test doubles (87 tests, zero external calls). The **CoachFn** is injected: tests use a null coach, production optionally wires in Claude. Domain modules register via `registerDomain()` + `registerRule()` at boot with zero changes to core code.
 
 ## Configuration
 
@@ -162,6 +170,7 @@ Seven **universal primitives** model any progressive coaching domain:
 | `DATABASE_URL` | Storage backend | `file:./trainr.db` (local SQLite), `libsql://...turso.io` (Turso), `:memory:` (tests) |
 | `ANTHROPIC_API_KEY` | AI coaching via Claude | Optional -- system works without it |
 | `TRAINR_API_KEY` | MCP HTTP transport auth | Only needed for `MCP_TRANSPORT=http` |
+| `PORT` | REST API server port | Defaults to `3001` |
 
 ## Adding a Domain
 
@@ -191,16 +200,18 @@ for (const rule of golfDomain.progressionRules) {
 }
 ```
 
-See `src/domains/workout/` for the reference implementation -- includes Wendler 5/3/1, Boring But Big, and linear progression rules.
+See `src/domains/workout/` for the reference implementation -- includes Wendler 5/3/1, Boring But Big, Stew Smith pullups, and linear progression rules.
 
 ## Development
 
 ```bash
-npm test              # vitest, 51 tests
+npm test              # vitest, 87 tests
 npm run test:watch    # watch mode
 npm run lint          # tsc --noEmit
 npm run dev -- <args> # run CLI via tsx without building
 npm run build         # tsc to dist/
+npm run api           # Hono REST API server only
+npm run web           # API + Next.js web UI together
 ```
 
 Requires Node >= 20.
