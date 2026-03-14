@@ -15,6 +15,7 @@
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
+    "api": "tsx src/api/server.ts",
     "mcp:stdio": "MCP_TRANSPORT=stdio tsx src/mcp/server.ts",
     "mcp:http": "MCP_TRANSPORT=http tsx src/mcp/server.ts",
     "lint": "tsc --noEmit"
@@ -22,10 +23,12 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
     "@clack/prompts": "^0.9.0",
+    "@hono/node-server": "^1.19.11",
     "@libsql/client": "^0.14.0",
     "@modelcontextprotocol/sdk": "^1.9.0",
     "commander": "^13.0.0",
     "drizzle-orm": "^0.40.0",
+    "hono": "^4.12.8",
     "picocolors": "^1.1.1",
     "postgres": "^3.4.5",
     "uuid": "^11.0.5",
