@@ -5,79 +5,92 @@
 import type { PlannedSession } from '../../services/session.service.js';
 import type { DomainModule } from '../../core/domain.js';
 import type { CoachingNote, SessionRecord } from '../../core/schemas.js';
+import { dim, accent, warn, bold, success, S, box, boxLine, boxStart, boxEnd, energyBar } from './theme.js';
 
 export function renderPlannedSession(
   plan: PlannedSession,
   domain: DomainModule,
 ): string {
-  const lines: string[] = [];
   const { session, resolvedTargets, coachingNote } = plan;
 
-  lines.push(`\n━━━ ${session.session.label} ━━━`);
-  lines.push(`${session.cycle.label}  |  Est. ${session.session.estimatedDuration} min`);
+  const lines: (string | null)[] = [];
+
+  lines.push(dim(`${session.cycle.label}  ${S.DOT}  ${session.session.estimatedDuration} min`));
 
   if (session.session.notes) {
-    lines.push(`\n${session.session.notes}`);
+    lines.push(null);
+    lines.push(dim(session.session.notes));
   }
 
   if (coachingNote) {
-    lines.push(`\n💬 Coach: ${coachingNote.content}`);
+    lines.push(null);
+    lines.push(`${dim('💬')}  ${coachingNote.content}`);
     if (coachingNote.adjustments.length > 0) {
-      lines.push(`\nAdjustments:`);
+      lines.push(null);
+      lines.push(bold('Adjustments'));
       for (const adj of coachingNote.adjustments) {
-        lines.push(`  • ${adj.activityId}: ${adj.rationale}`);
+        lines.push(`  ${accent(S.ARROW)} ${bold(adj.activityId)} ${dim('—')} ${adj.rationale}`);
       }
     }
   }
 
-  lines.push(`\nActivities:`);
+  lines.push(null);
   session.session.activities.forEach((activity, i) => {
     const target = resolvedTargets[i];
     if (!target) return;
     const targetStr = domain.formatActivityTarget(activity, target);
-    lines.push(`  ${i + 1}. ${activity.name}`);
-    lines.push(`     ${targetStr}`);
+    lines.push(`${accent(S.BULLET)}  ${bold(activity.name)}`);
+    lines.push(`   ${dim(targetStr)}`);
+    if (i < session.session.activities.length - 1) lines.push(null);
   });
 
-  return lines.join('\n');
+  return '\n' + box(session.session.label, lines);
 }
 
 export function renderSessionRecord(
   record: SessionRecord,
   notes: CoachingNote[],
-  domain: DomainModule,
+  _domain: DomainModule,
 ): string {
-  const lines: string[] = [];
-  const date = record.completedAt?.toLocaleDateString() ?? 'Skipped';
+  const out: string[] = [];
 
-  lines.push(`\n━━━ Session ${record.id.slice(0, 8)} ━━━`);
-  lines.push(`Date: ${date}`);
+  const date = record.completedAt
+    ? record.completedAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    : 'Skipped';
+
+  out.push(boxStart(`Session ${dim(record.id.slice(0, 8))}`) + `   ${dim(date)}`);
+  out.push(boxLine());
 
   if (record.skipped) {
-    lines.push(`Status: Skipped${record.skipReason ? ` — ${record.skipReason}` : ''}`);
-    return lines.join('\n');
+    out.push(boxLine(`${warn(S.BULLET_OPEN)}  ${warn('Skipped')}${record.skipReason ? `  ${dim('—')}  ${dim(record.skipReason)}` : ''}`));
+    out.push(boxLine());
+    out.push(boxEnd());
+    return '\n' + out.join('\n');
   }
 
+  const meta: string[] = [];
   if (record.durationMinutes) {
-    lines.push(`Duration: ${record.durationMinutes} min`);
+    meta.push(`${dim('Duration')}  ${record.durationMinutes} min`);
+  }
+  if (record.context) {
+    meta.push(`${dim('Energy')}  ${energyBar(record.context.energyLevel)}  ${dim(`${record.context.energyLevel}/5`)}`);
+  }
+  if (meta.length > 0) {
+    out.push(boxLine(meta.join('   ')));
   }
 
-  if (record.context) {
-    const { energyLevel, painPoints, additionalNotes } = record.context;
-    lines.push(`Energy: ${energyLevel}/5`);
-    if (painPoints.length > 0) {
-      lines.push(`Pain: ${painPoints.map((p) => p.area).join(', ')}`);
-    }
-    if (additionalNotes) lines.push(`Notes: ${additionalNotes}`);
+  if (record.context?.painPoints.length) {
+    out.push(boxLine(warn(`Pain: ${record.context.painPoints.map((p) => p.area).join(', ')}`)));
   }
 
   const preNote = notes.find((n) => n.phase === 'pre');
   if (preNote) {
-    lines.push(`\nCoach (pre): ${preNote.content}`);
+    out.push(boxLine());
+    out.push(boxLine(`${dim('💬')}  ${preNote.content}`));
   }
 
   if (record.activities.length > 0) {
-    lines.push(`\nActivities:`);
+    out.push(boxLine());
     for (const activity of record.activities) {
       const completed = activity.sets.filter((s) => s.completed);
       if (completed.length === 0) continue;
@@ -87,13 +100,22 @@ export function renderSessionRecord(
           return JSON.stringify(s.value);
         })
         .join(', ');
-      lines.push(`  ${activity.templateId}: ${summary}${activity.rpe ? ` @ RPE ${activity.rpe}` : ''}`);
+      const rpe = activity.rpe ? `   ${dim(`RPE ${activity.rpe}`)}` : '';
+      out.push(boxLine(`${success(S.BULLET)}  ${bold(activity.templateId)}  ${dim(summary)}${rpe}`));
     }
   }
 
   if (record.userNotes) {
-    lines.push(`\n"${record.userNotes}"`);
+    out.push(boxLine());
+    out.push(boxLine(dim(`"${record.userNotes}"`)));
   }
 
-  return lines.join('\n');
+  if (record.context?.additionalNotes) {
+    out.push(boxLine());
+    out.push(boxLine(dim(record.context.additionalNotes)));
+  }
+
+  out.push(boxLine());
+  out.push(boxEnd());
+  return '\n' + out.join('\n');
 }

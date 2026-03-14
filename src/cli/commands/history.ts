@@ -5,6 +5,7 @@ import { getActivePrograms, parseProgramConfig } from '../../services/program.se
 import { getDomain } from '../../core/domain.js';
 import { parseOutputFormat, outputJson, outputNdjson, applyFieldMask } from '../output.js';
 import { renderSessionRecord } from '../render/session.render.js';
+import { bold, dim, success, warn, S, divider, padRight } from '../render/theme.js';
 
 export function createHistoryCommand(repos: Repositories): Command {
   const history = new Command('history');
@@ -72,13 +73,18 @@ export function createHistoryCommand(repos: Repositories): Command {
           if (summaries.length === 0) {
             console.log('No sessions logged yet.');
           } else {
-            const prog = programs.find((p) => p.id === programId);
-            const domain = prog ? getDomain(parseProgramConfig(prog).domain) : null;
+            console.log(`\n  ${bold('Recent Sessions')}`);
+            console.log(`  ${divider()}\n`);
             for (const s of summaries) {
-              const date = s.record.completedAt?.toLocaleDateString() ?? 'Skipped';
-              const status = s.record.skipped ? '[SKIP]' : '[DONE]';
-              console.log(`  ${status}  ${date}  ${s.record.id.slice(0, 8)}`);
+              const date = s.record.completedAt
+                ? s.record.completedAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                : 'Skipped';
+              const dot = s.record.skipped ? warn(S.BULLET_OPEN) : success(S.BULLET);
+              const id = dim(s.record.id.slice(0, 8));
+              const reason = s.record.skipped && s.record.skipReason ? dim(`— ${s.record.skipReason}`) : '';
+              console.log(`  ${dot}  ${padRight(date, 8)} ${id}  ${reason}`);
             }
+            console.log('');
           }
         }
       } catch (err) {
